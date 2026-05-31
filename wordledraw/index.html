@@ -10,6 +10,22 @@
 <body>
 <div id="app">
     <h1>Wordledraw</h1>
+    <p>Draw shapes using Wordle! Input the Wordle answer, draw a shape and the website will generate the words you need to guess!</p>
+    <div id="word-input-container">
+        <h2>Input the answer:</h2>
+        <input type="text" id="wordle-answer-input" placeholder="Enter the Wordle answer here." maxlength="5">
+        <button id="set-button">Set</button>
+        <p>Set answer: <span id="wordle-answer"></span></p>
+    </div>
+    <div id="canvas-container">
+        <h2>Draw a shape:</h2>
+        <canvas id="drawing-canvas" width="500" height="500"></canvas>
+        <button id="generate-button">Generate Words</button>
+    </div>
+    <div id="output-container">
+        <h2>Words to Guess:</h2>
+        <ol id="word-list"></ol>
+    </div>
 </div>
 <script src="main.js"></script>
 </body>
