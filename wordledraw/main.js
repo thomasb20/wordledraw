@@ -7,7 +7,7 @@ let answer = "";
 fetch('./valid-wordle-words.txt')
     .then(response => response.text())
     .then(text => {
-        VALID_WORDS.push(...text.split('\n').map(word => word.trim()));
+        VALID_WORDS.push(...text.split('\n').map(word => word.trim()).filter(Boolean));
         console.log('Words loaded.');
     })
     .catch(error => {
@@ -31,23 +31,44 @@ document.getElementById('set-button').addEventListener('click', () => {
 
 function get_colours(word){
     // Gets the colours of the word based on the answer.
-    let colours = [];
+    let colours = Array(5).fill("grey");
     let word_letters = word.split('');
     let answer_letters = answer.split('');
+    let remaining_answer_letters = [];
 
-    for (let i = 0; i < word_letters.length; i++) {
-        let curr_word_letter = word_letters[i];
-        let curr_answer_letter = answer_letters[i];
-        if (curr_word_letter = curr_answer_letter) {
-            colours.push("green");
+    for (let i = 0; i < 5; i++) {
+        if (word_letters[i] === answer_letters[i]) {
+            colours[i] = "green";
         }
-        else if (answer_letters.includes(curr_word_letter)) {
-            colours.push("yellow");
+        else {
+            remaining_answer_letters.push(answer_letters[i]);
         }
-        else{
-            colours.push("grey");
+    }
+
+    for (let i = 0; i < 5; i++) {
+        if (colours[i] !== "green") {
+            let answer_index = remaining_answer_letters.indexOf(word_letters[i]);
+            if (answer_index !== -1) {
+                colours[i] = "yellow";
+                remaining_answer_letters.splice(answer_index, 1);
+            }
         }
     }
 
     return colours;
+}
+
+function get_word(wanted_colours) {
+    if (!Array.isArray(wanted_colours) || wanted_colours.length !== 5) {
+        return null;
+    }
+
+    for (let i = 0; i < VALID_WORDS.length; i++) {
+        let word = VALID_WORDS[i];
+        if (get_colours(word).every((colour, index) => colour === wanted_colours[index])) {
+            return word;
+        }
+    }
+
+    return null;
 }
