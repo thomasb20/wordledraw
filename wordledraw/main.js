@@ -2,6 +2,71 @@
 
 const VALID_WORDS = [];
 let answer = "";
+const GRID_SIZE = 5;
+const COLOURS = ["grey", "yellow", "green"];
+const COLOUR_HEX = {
+    grey: "#787c7e",
+    yellow: "#c9b458",
+    green: "#6aaa64"
+};
+
+let drawnShape = Array.from(
+    { length: GRID_SIZE },
+    () => Array(GRID_SIZE).fill("grey")
+);
+window.drawnShape = drawnShape;
+
+const canvas = document.getElementById("drawing-canvas");
+const context = canvas.getContext("2d");
+
+function drawShape() {
+    const cellSize = canvas.width / GRID_SIZE;
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let row = 0; row < GRID_SIZE; row++) {
+        for (let column = 0; column < GRID_SIZE; column++) {
+            context.fillStyle = COLOUR_HEX[drawnShape[row][column]];
+            context.fillRect(
+                column * cellSize,
+                row * cellSize,
+                cellSize,
+                cellSize
+            );
+
+            context.strokeStyle = "#ffffff";
+            context.lineWidth = 2;
+            context.strokeRect(
+                column * cellSize,
+                row * cellSize,
+                cellSize,
+                cellSize
+            );
+        }
+    }
+}
+
+canvas.addEventListener("click", (event) => {
+    const bounds = canvas.getBoundingClientRect();
+    const column = Math.floor((event.clientX - bounds.left) / (bounds.width / GRID_SIZE));
+    const row = Math.floor((event.clientY - bounds.top) / (bounds.height / GRID_SIZE));
+
+    if (row < 0 || row >= GRID_SIZE || column < 0 || column >= GRID_SIZE) {
+        return;
+    }
+
+    const currentColourIndex = COLOURS.indexOf(drawnShape[row][column]);
+    drawnShape[row][column] = COLOURS[(currentColourIndex + 1) % COLOURS.length];
+    drawShape();
+});
+
+document.getElementById("generate-button").addEventListener("click", () => {
+    drawnShape = drawnShape.map(row => [...row]);
+    window.drawnShape = drawnShape;
+    console.log("Drawn shape:", drawnShape);
+});
+
+drawShape();
 
 // Load valid words from the text file into the array
 fetch('./valid-wordle-words.txt')
