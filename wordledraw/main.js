@@ -2,7 +2,8 @@
 
 const VALID_WORDS = [];
 let answer = "";
-const GRID_SIZE = 5;
+const GRID_COLUMNS = 5;
+const GRID_ROWS = 6;
 const COLOURS = ["grey", "yellow", "green"];
 const COLOUR_HEX = {
     grey: "#787c7e",
@@ -11,8 +12,8 @@ const COLOUR_HEX = {
 };
 
 let drawn_shape = Array.from(
-    { length: GRID_SIZE },
-    () => Array(GRID_SIZE).fill("grey")
+    { length: GRID_ROWS },
+    () => Array(GRID_COLUMNS).fill("grey")
 );
 window.drawn_shape = drawn_shape;
 
@@ -20,27 +21,28 @@ const canvas = document.getElementById("drawing-canvas");
 const context = canvas.getContext("2d");
 
 function draw_shape() {
-    const cellSize = canvas.width / GRID_SIZE;
+    const cellWidth = canvas.width / GRID_COLUMNS;
+    const cellHeight = canvas.height / GRID_ROWS;
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let row = 0; row < GRID_SIZE; row++) {
-        for (let column = 0; column < GRID_SIZE; column++) {
+    for (let row = 0; row < GRID_ROWS; row++) {
+        for (let column = 0; column < GRID_COLUMNS; column++) {
             context.fillStyle = COLOUR_HEX[drawn_shape[row][column]];
             context.fillRect(
-                column * cellSize,
-                row * cellSize,
-                cellSize,
-                cellSize
+                column * cellWidth,
+                row * cellHeight,
+                cellWidth,
+                cellHeight
             );
 
             context.strokeStyle = "#ffffff";
             context.lineWidth = 2;
             context.strokeRect(
-                column * cellSize,
-                row * cellSize,
-                cellSize,
-                cellSize
+                column * cellWidth,
+                row * cellHeight,
+                cellWidth,
+                cellHeight
             );
         }
     }
@@ -48,10 +50,10 @@ function draw_shape() {
 
 canvas.addEventListener("click", (event) => {
     const bounds = canvas.getBoundingClientRect();
-    const column = Math.floor((event.clientX - bounds.left) / (bounds.width / GRID_SIZE));
-    const row = Math.floor((event.clientY - bounds.top) / (bounds.height / GRID_SIZE));
+    const column = Math.floor((event.clientX - bounds.left) / (bounds.width / GRID_COLUMNS));
+    const row = Math.floor((event.clientY - bounds.top) / (bounds.height / GRID_ROWS));
 
-    if (row < 0 || row >= GRID_SIZE || column < 0 || column >= GRID_SIZE) {
+    if (row < 0 || row >= GRID_ROWS || column < 0 || column >= GRID_COLUMNS) {
         return;
     }
 
@@ -191,7 +193,7 @@ function generate_words() {
 
     const used_words = [];
 
-    for (let row = 0; row < GRID_SIZE; row++) {
+    for (let row = 0; row < GRID_ROWS; row++) {
         const wantedColours = drawn_shape[row];
         const word = get_word(wantedColours, used_words);
         const item = document.createElement("li");
