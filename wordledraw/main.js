@@ -69,16 +69,45 @@ document.getElementById("generate-button").addEventListener("click", () => {
 
 draw_shape();
 
-// Load valid words from the text file into the array
-fetch('./valid-wordle-words.txt')
-    .then(response => response.text())
-    .then(text => {
-        VALID_WORDS.push(...text.split('\n').map(word => word.trim()).filter(Boolean));
-        console.log('Words loaded.');
-    })
-    .catch(error => {
-        console.error('Error loading the words:', error);
-    });
+// Load the selected valid-word list into the array
+function load_word_list(useCommonWords) {
+    const fileName = useCommonWords
+        ? './valid-wordle-words-short.txt'
+        : './valid-wordle-words.txt';
+    const status = document.getElementById('word-list-status');
+
+    VALID_WORDS.length = 0;
+    answer = "";
+    document.getElementById("wordle-answer").textContent = "";
+    status.textContent = useCommonWords
+        ? 'Loading common words...'
+        : 'Loading all valid words...';
+
+    fetch(fileName)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Could not load ${fileName}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            VALID_WORDS.push(...text.split(/\r?\n/).map(word => word.trim()).filter(Boolean));
+            status.textContent = useCommonWords
+                ? `Using common words (${VALID_WORDS.length})`
+                : `Using all words valid in Wordle (${VALID_WORDS.length})`;
+            console.log('Words loaded:', VALID_WORDS.length);
+        })
+        .catch(error => {
+            status.textContent = 'Could not load the word list.';
+            console.error('Error loading the words:', error);
+        });
+}
+
+document.getElementById('common-words-toggle').addEventListener('change', (event) => {
+    load_word_list(event.target.checked);
+});
+
+load_word_list(true);
 
 document.getElementById('set-button').addEventListener('click', () => {
     // Check if input is valid

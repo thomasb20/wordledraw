@@ -24,3 +24,20 @@ button {
     padding: 8px 12px;
     cursor: pointer;
 }
+
+#word-list-toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+#word-list-toggle label {
+    cursor: pointer;
+}
+
+#word-list-status {
+    color: #666666;
+    font-size: 0.9rem;
+}
