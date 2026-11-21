@@ -10,23 +10,23 @@ const COLOUR_HEX = {
     green: "#6aaa64"
 };
 
-let drawnShape = Array.from(
+let drawn_shape = Array.from(
     { length: GRID_SIZE },
     () => Array(GRID_SIZE).fill("grey")
 );
-window.drawnShape = drawnShape;
+window.drawn_shape = drawn_shape;
 
 const canvas = document.getElementById("drawing-canvas");
 const context = canvas.getContext("2d");
 
-function drawShape() {
+function draw_shape() {
     const cellSize = canvas.width / GRID_SIZE;
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let row = 0; row < GRID_SIZE; row++) {
         for (let column = 0; column < GRID_SIZE; column++) {
-            context.fillStyle = COLOUR_HEX[drawnShape[row][column]];
+            context.fillStyle = COLOUR_HEX[drawn_shape[row][column]];
             context.fillRect(
                 column * cellSize,
                 row * cellSize,
@@ -55,18 +55,19 @@ canvas.addEventListener("click", (event) => {
         return;
     }
 
-    const currentColourIndex = COLOURS.indexOf(drawnShape[row][column]);
-    drawnShape[row][column] = COLOURS[(currentColourIndex + 1) % COLOURS.length];
-    drawShape();
+    const currentColourIndex = COLOURS.indexOf(drawn_shape[row][column]);
+    drawn_shape[row][column] = COLOURS[(currentColourIndex + 1) % COLOURS.length];
+    draw_shape();
 });
 
 document.getElementById("generate-button").addEventListener("click", () => {
-    drawnShape = drawnShape.map(row => [...row]);
-    window.drawnShape = drawnShape;
-    console.log("Drawn shape:", drawnShape);
+    drawn_shape = drawn_shape.map(row => [...row]);
+    window.drawn_shape = drawn_shape;
+    console.log("Drawn shape:", drawn_shape);
+    generate_words();
 });
 
-drawShape();
+draw_shape();
 
 // Load valid words from the text file into the array
 fetch('./valid-wordle-words.txt')
@@ -81,7 +82,7 @@ fetch('./valid-wordle-words.txt')
 
 document.getElementById('set-button').addEventListener('click', () => {
     // Check if input is valid
-    let input = document.getElementById('wordle-answer-input').value;
+    let input = document.getElementById('wordle-answer-input').value.trim().toLowerCase();
     if (VALID_WORDS.includes(input)) {
         document.getElementById("wordle-answer").innerHTML = `${input}`;
         answer = input;
@@ -123,17 +124,59 @@ function get_colours(word){
     return colours;
 }
 
-function get_word(wanted_colours) {
+function get_word(wanted_colours, excluded_words = []) {
     if (!Array.isArray(wanted_colours) || wanted_colours.length !== 5) {
         return null;
     }
 
     for (let i = 0; i < VALID_WORDS.length; i++) {
         let word = VALID_WORDS[i];
+        if (excluded_words.includes(word)) {
+            continue;
+        }
         if (get_colours(word).every((colour, index) => colour === wanted_colours[index])) {
             return word;
         }
     }
 
     return null;
+}
+
+function generate_words() {
+    const word_list = document.getElementById("word-list");
+    word_list.replaceChildren();
+
+    if (!answer) {
+        const item = document.createElement("li");
+        item.textContent = "Set a valid Wordle answer first.";
+        word_list.appendChild(item);
+        return;
+    }
+
+    if (VALID_WORDS.length === 0) {
+        const item = document.createElement("li");
+        item.textContent = "Valid words are still loading.";
+        word_list.appendChild(item);
+        return;
+    }
+
+    const used_words = [];
+
+    for (let row = 0; row < GRID_SIZE; row++) {
+        const wantedColours = drawn_shape[row];
+        const word = get_word(wantedColours, used_words);
+        const item = document.createElement("li");
+
+        if (word !== null && get_colours(word).every((colour, index) => {
+            return colour === wantedColours[index];
+        })) {
+            item.textContent = word;
+            used_words.push(word);
+        }
+        else {
+            item.textContent = "No matching word";
+        }
+
+        word_list.appendChild(item);
+    }
 }
